@@ -16,13 +16,13 @@ Lucky me, lots of great game resources are out there that have been ripped from 
 
 I manage to find this screenshot.
 
-![original_image](/content/images/2014/Dec/original.png)
+![original_image](/assets/2014-12-10-ripping-gameboy-tilesets-with-imagemagick/original.png)
 
 These are the tiles I want! All I need is to abstract them into a tileset that my map editor can load. Lucky me, I have an trick up my sleeve, [ImageMagick](http://www.imagemagick.org/).
 
 First things first, I need to isolate the screenshot and crop it to its correct size. In my handy point-and-grunt system image preview tool, I pull out the 320x256 px screenshot such that it lines up perfectly with the 16x16 px tiles.
 
-![cropped_image](/content/images/2014/Dec/cropped_image.png)
+![cropped_image](/assets/2014-12-10-ripping-gameboy-tilesets-with-imagemagick/cropped_image.png)
 
 Next, I normalize the image. My strategy requires that, in memory, every tree looks __exactly__ like every other tree. Even though the trees were originally rendered identically (probably by an emulator), due to image format's compression, the exact color of the pixles don't necessarily match anymore.
 
@@ -40,7 +40,7 @@ $> convert -crop 16x16 cropped_image.bmp tiles/tile_%d.bmp
 
 Now ```/tiles``` is filled with 16x16 tiles looking like this.
 
-![tiles_0](/content/images/2014/Dec/tile_0.png)
+![tiles_0](/assets/2014-12-10-ripping-gameboy-tilesets-with-imagemagick/tile_0.png)
 
 But, there are 320 of them! We need to dedupe! Good thing we normalized. If we inspect the actual files of two matching sprites, they're actually identical!
 
@@ -67,7 +67,7 @@ montage -border 0 -geometry +0+0 -tile 6x5 tiles/tile* tileset.png
 
 The result is a perfect Final Fantasy Adventure tileset.
 
-![tileset](/content/images/2014/Dec/tileset.png)
+![tileset](/assets/2014-12-10-ripping-gameboy-tilesets-with-imagemagick/tileset.png)
 
 _Notes:
 1. OSX users can install both ImageMagick and fdupes with [homebrew](http://brew.sh/).
