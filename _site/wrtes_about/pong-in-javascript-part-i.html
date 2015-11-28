@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Pong in JavaScript Part I</title><meta name="twitter:card" content="summary" /><meta name="twitter:site" content="@dproi" /><meta name="twitter:title" content="Pong in JavaScript Part I" /><meta name="twitter:description" content="This post is part one of a two part series. Find part two here and complete code at github.com/x/Game-Development-in-Javascript-Tutorial."><meta name="description" content="This post is part one of a two part series. Find part two here and complete code at github.com/x/Game-Development-in-Javascript-Tutorial."><link rel="icon" href="/assets/favicon.png"><link rel="apple-touch-icon" href="/assets/touch-icon.png"><link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css"><link rel="stylesheet" href="/assets/core.css"><link rel="canonical" href="/wrtes_about/pong-in-javascript-part-i"><link rel="alternate" type="application/atom+xml" title="Devon Peticolas" href="/feed.xml" /></head><body><aside class="logo"> <a href="/"> <img src="http://www.gravatar.com/avatar/bb15addc609e082ddaa71cba6cdac1a7.png?s=80" class="gravatar"> </a> <span class="logo-prompt">Back to Home</span></aside><main> <noscript><style> article .footnotes { display: block; }</style></noscript><article><div class="center"><h1>Pong in JavaScript Part I</h1><time>October 22, 2013</time></div><div class="divider"></div><p><em>This post is part one of a two part series. Find part two <a href="http://blog.peticol.as/pong-in-javascript-part-ii/">here</a> and complete code at <a href="http://github.com/x/Game-Development-in-Javascript-Tutorial">github.com/x/Game-Development-in-Javascript-Tutorial</a>.</em></p><p><em>If you find any bugs in my code or grammar, please make a pull request <a href="http://github.com/x/Game-Development-in-Javascript-Tutorial">on the source code</a>.</em></p><hr /><p><em>JavaScript is the language of the web. There are more JavaScript interpreters being used every day than any other language (you’re using one right now). The goal of this peice is to introduce the reader JavaScript the language and show how to, with an HTML5 Canvas element, create a simple game. It is targeted twords readers who have never been exposed to JavaScript, but understand the basics of programming.</em></p><h2 id="what-is-javascript">What is JavaScript</h2><p>JavaScript is a <em>lightweight</em>, <em>dynamic</em>, <em>weakly-typed</em> language. It features <em>prototype-based objects</em>, <em>first-class functions</em>, and <em>asynchronous event handling</em>.</p><p>Being lightweight means that JavaScript is a small language. Dynamic means that instead of compiling down to machine code, it’s interpreted line by line at runtime. This means that if there is a syntax error half way through a program, then all the code before the error will run, and then the program will fail at the line where the error is.</p><p>The easiest way to start with Javascript is to create a blank HTML page, write your code in a .js file, and then require the file in a script tag on the blank page. Your errors and output that we’ll discuss in the next two sections will go to your browsers developer console.</p><pre><code class="language-html">&lt;html&gt;
+	&lt;script src="__PATH_TO_JAVASCRIPT_FILE_HERE__"&gt;&lt;/script&gt;
+&lt;/html&gt;
+</code></pre><p>Here’s an example of Hello World in JavaScript.<br /> <code>javascript console.log("Hello world."); </code><br /> Note that there’s no main function, the code starts being interpreted at the top of the file and just runs. <code>console.log</code> is actually not part of Javascript, but since Javascript runs in a browser it doesn’t have stdin and stdout, it instead uses the console object provided by the browser and writes to the browsers developer console.</p><p>Here’s an example of a function you probably recognize, isPalindrome, written in JavaScript.</p><pre><code class="language-javascript">function isPalindrome(word){
+	var length = word.length;
+	for(var i=0; i &lt;= length/2; i++){
+		if(word.charAt(i) !== word.charAt(length-i-1)){
+			return false;
+		}
+	}
+	return true;
+}
+
+isPalindrome("racecar"); // true
+isPalindrome("hello"); //false
+</code></pre><p>The function takes a word, loops through half of the list and compares it to the other half of the list. When it finds an inconsistency it returns false, otherwise it returns true.</p><p>For the most part this code looks something like C or Java, the only really weird thing is the <code>!==</code> which is equivalent to what you normally see <code>!=</code>. If this were checking equality we’d use <code>===</code> instead of <code>==</code>. This is a minor detail about how JavaScript handles equality, for now just accept it.</p><p>Look at the first line of the function:</p><pre><code class="language-javascript">var length = word.length;
+</code></pre><p>The <code>word.length</code> clearly returns a number, but instead of declaring length as an int we declared it as a var (as in variable).</p><p>If we declared length to be a String it would look like this,</p><pre><code class="language-javascript">var length = "hello";
+</code></pre><p>If we declared length to be an array it would look like this:</p><pre><code class="language-javascript">var length = [1, 2, 3];
+</code></pre><p>In fact we could redeclare length to be all those things:</p><pre><code class="language-javascript">var length = word.length;
+length = "hello";
+length = [1, 2, 3];
+</code></pre><p>Javascript is <em>dynamically typed</em>. This means that we don’t have to specify the<br /> type of a variable when we declare it exists, and we can assign values of any<br /> type to any variable.</p><p>This leads to the next feature of JavaScript. It has first-class functions. This means functions are treated just like data. We can assign functions to variables and treat the variables like we would a variable in C or Java.</p><pre><code class="language-javascript">var isPalindrome = function(word){
+	var length = word.length;
+	for(var i=0; i &lt; length/2; i++){
+		if(word.charAt(i) !== word.charAt(length-i-1)){
+			return false;
+		}
+	}
+	return true;
+};
+
+isPalindrome("racecar");
+isPalindrome("hello");
+</code></pre><p>Note how in this implementation, instead of saying</p><pre><code class="language-javascript">function isPalindrome(word){ ... }
+</code></pre><p>we say</p><pre><code class="language-javascript">var isPalindrome = function(word){ ... };
+</code></pre><p>So we’re now declaring a variable called isPalindrome and setting it equal to an <em>anonymous function</em>.</p><p><strong>Definition:</strong> An <em>anonymous function</em> is any function in the form <code>function(){ .. };</code>. You can think of these as functions without names, even though they’re commonly set to a named variable.</p><p>So anonymous functions are part of why we say functions are <em>first-class citizens</em> in JavaScript. They’re treated like data and can be set into variables. The second, more useful power is that they can be passed into functions just like you would any other data!</p><pre><code class="language-javascript">var sayWorld = function(){
+	console.log("world");
+};
+
+var sayHello = function(){
+	console.log("hello");
+}
+
+var runFuns = function(fun1, fun2){
+	fun1();
+	fun2();
+};
+
+runFuns(sayHello, sayWorld);
+// =&gt; "hello"
+// =&gt; "world"
+
+
+runFuns(sayWorld, sayHello);
+// =&gt; "world"
+// =&gt; "hello"
+
+
+runFuns(sayHello, function(){
+	console.log("devon");
+});
+// =&gt; "hello"
+// =&gt; "devon"
+</code></pre><p>Note how in that last one I just declared an anonymous function right in the execution of the runFuns function.</p><h2 id="the-javascript-event-loop">The JavaScript Event Loop</h2><p>Javascript by itself can’t really do all that much. The strength of JavaScript comes from its ability to use functions that the browser gives it access to. One of those functions we will be using a lot is <code>setTimeout</code>. The purpose of <code>setTimeout</code> is to delay code from executing. We will be using it to animate things in our games.</p><p>As we discussed in the previous section, functions can be passed into other functions in JavaScript. <code>setTimeout</code> takes two parameters, a function, and then a time in milliseconds to be delayed before that function is run.</p><pre><code class="language-javascript">setTimeout(function(){
+	console.log("hello world");
+}, 5000);
+</code></pre><p>If we run this we see that <code>setTimeout</code> delays “hello world” from being printed for five seconds. You might think this is like the sleep function in C, but it’s not. This is where things get crazy.</p><pre><code class="language-javascript">setTimeout(function(){
+	console.log("hello");
+}, 5000);
+console.log("world");
+</code></pre><p>If <code>setTimeout</code> worked like sleep, this would log “hello” and then “world”. <strong>But it doesn’t.</strong> Instead it logs “world” <em>and then</em> “hello”.</p><p>JavaScript was made as an event driven language. When something happens in the browser, some code should run. “Something happens in the browser” could be a form submission, or a keystroke, or even just a certain amount of time passing. As a programmer, we don’t want to be responsible for constantly checking the time or button presses, so instead, in the background, JavaScript runs a loop constantly checking for new events that get queued up by the browser.</p><p><code>setTimeout</code> is our way of telling the browser to simulate one of these events after a period of time. Whenever we create one of these <em>event listeners</em> we write an anonymous function called a <em>callback</em> that gets called once the event happens.</p><p>Lets look at some examples:</p><pre><code class="language-javascript">setTimeout(function(){
+	console.log("world");
+}, 5000);
+console.log("hello");
+</code></pre><p>This is the correct version of our function from before. It will say “hello” immediately and then five seconds later say “world”.</p><p>Imagine we wanted to say “hello” after five seconds and then “world” five seconds after that. An incorrect way to do this would be:</p><pre><code class="language-javascript">setTimeout(function(){
+	console.log("hello");
+}, 5000);
+setTimeout(function(){
+	console.log("world");
+}, 5000);
+</code></pre><p>This <em>won’t</em> display the messages five seconds apart. Instead both messages will display at the same time after five seconds. This is because we set the <code>setTimeout</code>s at the same time.</p><p>One possible solution is to tell our browser to just run the first <code>setTimeout</code> (hello) after five seconds, and our second <code>setTimeout</code> (world) after ten seconds.</p><pre><code class="language-javascript">setTimeout(function(){
+	console.log("hello");
+}, 5000);
+setTimeout(function(){
+	console.log("world");
+}, 10000);
+</code></pre><p>This works… most of the time. Unfortunately the browser can’t guarantee that it will call our code after the exact number of milliseconds we want since it also needs to handle browser things like loading tabs, pages, and executing other JavaScript. If it’s really busy it might take more than ten seconds to realize how much time has passed and run them at the same time. This strategy is also subjectable to the programmer’s bad math errors.</p><p>The idea of one thing coming after the other matters to us because this is how we’re going to animate things in our games.</p><p>The better way to do this is to set our <code>setTimeout</code> for “hello” first, and then in the anonymous function where we’re saying “hello” we immediately after set a second <code>setTimeout</code> for five seconds later.</p><pre><code class="language-javascript">setTimeout(function(){
+	console.log("hello");
+	setTimeout(function(){
+		console.log("world");
+	}, 5000);
+}, 5000);
+</code></pre><p>Note how I’m stacking callbacks inside of callbacks now. This can get pretty ugly pretty fast, but we can clean it a little by using callbacks ourselves in our own functions.</p><pre><code class="language-javascript">var sayHello = function(time, cb){
+	setTimeout(function(){
+		console.log("hello");
+		cb();
+	}, time);
+}
+
+var sayWorld = function(time){
+	setTimeout(function(){
+		console.log("world");
+	}, time);
+}
+
+sayHello(5000, function(){
+	sayWorld(5000);
+});
+</code></pre><p>This is a much more modular way of structuring our events because now we can plug and play them in any order, or easily make things happen between them.</p><p>One last thing that you need to understand about the event queue is that it only runs one thing at a time. Consider the following code:</p><pre><code class="language-javascript">setTimeout(function(){
+	console.log("world");
+}, 5000);
+console.log("hello");
+while(true){};
+</code></pre><p>The browser will be told “in five seconds run this function that says world”, and in five seconds the browser will put that function call into a queue that the event loop is constantly checking. But immediately after we say “hello” we’ve started a <code>while(true)</code> loop that will never end and thus never let the current bit of code finish. Until this code finishes running, the event loop will never check the queue and our <code>console.log("world")</code> will never run.</p><h2 id="the-canvas">The Canvas</h2><p>JavaScript is what we’ll be writing our code in, but it’s only one peice of the puzzle. We’re going to need a screen to write to. In HTML5 we have something awesome called Canvas. You can think of it as an image just like any other image on the web except that you can draw on it using JavaScript and the tools in the HTML5 API that your browser gives you.</p><p>In order to start off, create a simple html document with just our javascript and our canvas in it. I’m calling my html index.html and my javascript, in the same directory, animate.js. Give the canvas element an id of “screen” so we can easily grab it in our javascript and a size of 240x160.</p><pre><code class="language-html">&lt;html&gt;
+	&lt;canvas id="screen" width="240" height="160"&gt;&lt;/canvas&gt;
+	&lt;script src="animate.js"&gt;&lt;/script&gt;
+&lt;/html&gt;
+</code></pre><p>In our JavaScript file the first thing we’ll have to do is grab the canvas element. The canvas element is a drawing surface that exposes one or more <em>rendering contexts</em> which are defined in some dimension and allow us to draw in the element. We’re going to focus on the 2D rendering context, but there are experimental implementations of the 3D context based on OpenGL.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+</code></pre><p>What’s returned by getContext is a context object. This object is filled with functions that we can use for drawing. All of these methods take (x,y) coordinates defined with (0,0) in the top-left corner, positive-y going down, and positive-x going to the right. The units are measured in “pixels” that are defined by the context. Lets draw a rectangle.</p><p>First lets define a fill-style, the rules governing things like the color of what ever we’re going to draw. Lets make the fill-style red.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+</code></pre><p>Now lets draw a red-filled rectangle at the position (20, 20) thats 50 pixels tall and 75 pixels wide.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+ctx.fillRect(20, 20, 75, 50);
+</code></pre><p>We could also draw another rectangle, but this time lets make it blue and little translucent using the rgba definition of color.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+ctx.fillRect(20, 20, 75, 50);
+
+ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+ctx.fillRect(40, 40, 50, 50);
+</code></pre><p>If we wanted to draw another red square after the blue square, but didn’t want to manually reset the fillStyle, we can use the save and restore functions to stash rendering context’s fillStyle.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+ctx.fillRect(20, 20, 75, 50);
+ctx.save();
+
+ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+ctx.fillRect(40, 40, 50, 50);
+ctx.restore();
+
+ctx.fillRect(60, 60, 50, 50);
+</code></pre><h2 id="animation">Animation</h2><p>What’s currently happening is our html file loads, our canvas is created, and then we immediately draw shapes to it using our JavaScript. We’re going to take this a step further now using our knowledge of the event loop and setTimeouts.</p><p>Lets first create a flashing box. We’ll wait one second, draw the box, wait one second, then clear the screen. For clearing the screen we’ll draw a <em>clearRect</em> across the whole screen.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+
+setTimeout(function(){
+	ctx.fillRect(20, 20, 50, 50);
+	setTimeout(function(){
+		ctx.clearRect(0, 0, 240, 160);
+	}, 1000);
+}, 1000);
+</code></pre><p>It would be great to do this multiple times, we can do so pretty easily using recursion.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+
+var pulseRect = function(){
+	setTimeout(function(){
+		ctx.fillRect(20, 20, 50, 50);
+		setTimeout(function(){
+			ctx.clearRect(0, 0, 240, 160);
+			pulseRect();
+		}, 1000);
+	}, 1000);
+};
+
+pulseRect();
+</code></pre><p>Congratulations, you now have a pulsing rectangle! But we can do a lot better than this. Lets consider setTimeouts sister function, setInterval. setInterval works just like setTimeout, except setting events in the given interval. If setInterval is given a function and 5000 milliseconds, the function will be run every five seconds over and over again.</p><p>Lets get rid of the recursion and clean up this code using setInterval.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+
+setInterval(function(){
+	ctx.fillRect(20, 20, 50, 50);
+	setTimeout(function(){
+		ctx.clearRect(0, 0, 240, 160);
+	}, 1000);
+}, 2000);
+</code></pre><p>setInterval is how we’re going to animate things on the canvas. Our basic loop will be clear screen, change draw position, draw objects. Lets try moving a square across the screen.</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
+
+ctx.fillStyle = "rgb(200, 0, 0)";
+
+var xLocation = 0;
+setInterval(function(){
+	ctx.clearRect(0, 0, 240, 160);
+	xLocation++;
+	ctx.fillRect(xLocation, 20, 50, 50);
+}, 100);
+</code></pre><p>Two things are very different. First, we made the interval a lot smaller. We want our box to move a lot faster than one pixel every two seconds. Second I now have a variable called xLocation that exists outside of the anonymous function that it knows about and can update.</p><p>We could take this further. We could abstract the yLocation as well, and the location change and the drawing into their own functions. But if we want multiple boxes moving in different ways this will get messy quickly. What we really need is a reusable box <em>class</em> that we can use to create multiple box <em>instances</em> that can maintain themselves…</p><p>We’ve now talked about the JavaScript, how to delay code with JavaScript, Canvas, how to draw to the Canvas, and finally animation. But now we need more control of our boxes and need them to be aware of each other.</p><p><em>Keep reading in <a href="http://blog.peticol.as/pong-in-javascript-part-ii/">part two</a> of this tutorial!</em></p></article><div class="back"> <a href="/">Back</a></div></main></body></html>
