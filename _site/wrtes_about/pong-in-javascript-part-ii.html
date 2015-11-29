@@ -1,365 +1,355 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Pong in JavaScript Part II</title><meta name="twitter:card" content="summary" /><meta name="twitter:site" content="@dproi" /><meta name="twitter:title" content="Pong in JavaScript Part II" /><meta name="twitter:description" content="This post is part two of a two part series. Find part one here and complete code at github.com/x/Game-Development-in-Javascript-Tutorial."><meta name="description" content="This post is part two of a two part series. Find part one here and complete code at github.com/x/Game-Development-in-Javascript-Tutorial."><link rel="icon" href="/assets/favicon.png"><link rel="apple-touch-icon" href="/assets/touch-icon.png"><link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css"><link rel="stylesheet" href="/assets/core.css"><link rel="canonical" href="/wrtes_about/pong-in-javascript-part-ii"><link rel="alternate" type="application/atom+xml" title="Devon Peticolas" href="/feed.xml" /></head><body><aside class="logo"> <a href="/"> <img src="http://www.gravatar.com/avatar/bb15addc609e082ddaa71cba6cdac1a7.png?s=80" class="gravatar"> </a> <span class="logo-prompt">Back to Home</span></aside><main> <noscript><style> article .footnotes { display: block; }</style></noscript><article><div class="center"><h1>Pong in JavaScript Part II</h1><time>October 25, 2013</time></div><div class="divider"></div><p><em>This post is part two of a two part series. Find part one <a href="http://blog.peticol.as/pong-in-javascript-part-i/">here</a> and complete code at <a href="http://github.com/x/Game-Development-in-Javascript-Tutorial">github.com/x/Game-Development-in-Javascript-Tutorial</a>.</em></p><p><em>If you find any bugs in my code or grammar, please make a pull request <a href="http://github.com/x/Game-Development-in-Javascript-Tutorial">on the source code</a>.</em></p><hr /><p><em>For this part of the lesson, delete everything in your old animate.js file and start over. It’s important to leave your index file and the canvas defined with a width of 240 and a height of 160. If you get lost at some point, the finished code is at the bottom.</em></p><p><em>Your index.html file should look something like this.</em><br /> ```html</p><html> <canvas id="screen" width="240" height="160"></canvas> <script src="./animate.js"></script></html><pre><code>
-## Objects
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Pong in JavaScript Part II</title><meta name="twitter:card" content="summary" /><meta name="twitter:site" content="@dproi" /><meta name="twitter:title" content="Pong in JavaScript Part II" /><meta name="twitter:description" content="This post is part two of a two part series. Find part one here and complete code at github.com/x/Game-Development-in-Javascript-Tutorial."><meta name="description" content="This post is part two of a two part series. Find part one here and complete code at github.com/x/Game-Development-in-Javascript-Tutorial."><link rel="icon" href="/assets/favicon.png"><link rel="apple-touch-icon" href="/assets/touch-icon.png"><link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css"><link rel="stylesheet" href="/assets/core.css"><link rel="canonical" href="/wrtes_about/pong-in-javascript-part-ii"><link rel="alternate" type="application/atom+xml" title="Devon Peticolas" href="/feed.xml" /></head><body><aside class="logo"> <a href="/"> <img src="http://www.gravatar.com/avatar/bb15addc609e082ddaa71cba6cdac1a7.png?s=80" class="gravatar"> </a> <span class="logo-prompt">Back to Home</span></aside><main> <noscript><style> article .footnotes { display: block; }</style></noscript><article><div class="center"><h1>Pong in JavaScript Part II</h1><time>October 25, 2013</time></div><div class="divider"></div><p><em>This post is part two of a two part series. Find part one <a href="http://blog.peticol.as/pong-in-javascript-part-i/">here</a> and complete code at <a href="http://github.com/x/Game-Development-in-Javascript-Tutorial">github.com/x/Game-Development-in-Javascript-Tutorial</a>.</em></p><p><em>If you find any bugs in my code or grammar, please make a pull request <a href="http://github.com/x/Game-Development-in-Javascript-Tutorial">on the source code</a>.</em></p><hr><p><em>For this part of the lesson, delete everything in your old animate.js file and start over. It&#39;s important to leave your index file and the canvas defined with a width of 240 and a height of 160. If you get lost at some point, the finished code is at the bottom.</em></p><p><em>Your index.html file should look something like this.</em> <code>html &lt;html&gt; &lt;canvas id=&quot;screen&quot; width=&quot;240&quot; height=&quot;160&quot;&gt;&lt;/canvas&gt; &lt;script src=&quot;./animate.js&quot;&gt;&lt;/script&gt; &lt;/html&gt; </code></p><h2>Objects</h2><p>In object oriented programming with classes, a class is a construct used to define a distinct type and an object usually refers to an instance of a class. JavaScript is slightly different in that it&#39;s a prototype based language. Instead of objects being instances of classes, objects are just clones of other objects which they call their prototype.</p><p>This allows for a lot of flexibility that normal object oriented languages don&#39;t offer, but it also has created a lot of confusion. The <em>&quot;class oriented&quot;</em> way of creating objects in JavaScript is to use the <code>new</code> operator. When the <code>new</code> operator is used on a function, it clones that function&#39;s prototype into a new object, applies the function, and then returns the object. We can use the <code>new</code> operator to mimic a class based language by treating the function as a constructor and assign class methods to the functions prototype.</p><p>For example, if we wanted to create a Car class we could do:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">Car</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">color</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="nx">color</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Car</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">describe</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="s1">'This is a '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">+</span> <span class="s1">' car.'</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div><p>Then to use the class:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">redCar</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Car</span><span class="p">(</span><span class="s1">'red'</span><span class="p">);</span>
+<span class="nx">redCar</span><span class="p">.</span><span class="nx">describe</span><span class="p">();</span> <span class="c1">// alerts "this is a red car."</span>
+</code></pre></div><p>For our pong game, we&#39;re going to create a <em>&quot;class&quot;</em> for game elements. Our elements will maintain their size dimensions, positions, have a method for drawing themselves, move themselves, and, with the help of a global elements container, be able to detect collisions with other elements.</p><p>For simplicity sake we&#39;ll add a few restrictions. * All elements will be rectangles. * All elements will check for collisions against all other elements (instead of a set of &quot;nearby&quot; elements). * When an element collides with another element, it reverses it&#39;s velocity (bounces).</p><p>Let&#39;s get started:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">Element</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">,</span> <span class="nx">vx</span><span class="p">,</span> <span class="nx">vy</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">width</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">height</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="nx">vx</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">vy</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div><p>Here we have our constructor, pretty basic. It takes an <code>x</code> and a <code>y</code> for position, a <code>width</code> and a <code>height</code>. Optionally it can take a <code>vx</code> for it&#39;s horizontal velocity and a <code>vy</code> for it&#39;s vertical velocity, which both default to zero when not set.</p><p>We&#39;re also going to want to add a way to iterate through all of our elements easily. To do this we&#39;re going to add a global <code>elements</code> list and append new elements to it when their constructor is applied:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">elements</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="kd">var</span> <span class="nx">Element</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">,</span> <span class="nx">vx</span><span class="p">,</span> <span class="nx">vy</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">width</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">height</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="nx">vx</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">vy</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
 
-In object oriented programming with classes, a class is a construct used to define a distinct type and an object usually refers to an instance of a class. JavaScript is slightly different in that it's a prototype based language. Instead of objects being instances of classes, objects are just clones of other objects which they call their prototype.
+  <span class="nx">elements</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div><p>The next thing we&#39;ll need to do is have a way to draw the elements. At the top of our file we&#39;ll want to keep the same instantiation of our <code>canvas</code> and our <code>ctx</code> that we had before:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">canvas</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'screen'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ctx</span> <span class="o">=</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s1">'2d'</span><span class="p">);</span>
+</code></pre></div><p>In our Element prototype we&#39;ll add a draw function that uses them:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">draw</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div><p>Now let&#39;s instantiate a couple elements relevant to our pong game:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">paddle1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">paddle2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ball</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+</code></pre></div><p>Now if we load our screen we should just see two paddles facing each other and not much else.</p><h2>Moving</h2><p>Our big issue is that nothing is moving. Similar to our previous example of basic moving rectangles, we&#39;ll need a loop constantly clearing the canvas, moving the elements, and drawing the elements. In addition, our loop will have to manage some game logic. We&#39;ll call this loop, the game loop.</p><p>Before we go any further, I find it helps to explicitly declare our element speeds and refresh rate at the top of our file:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">FPS</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">PADDLE_SPEED</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">BALL_SPEED</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</code></pre></div><p><em>Note that <code>FPS</code> is a rate of game updates per second, while ```PADDLE</em>SPEED<code>and</code>BALL<em>SPEED``` are a displacement constant of pixels per second.</em></p><p>Now let&#39;s add our movement:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">move</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div><p>Create our game loop at the bottom of our code:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">gameLoop</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">clearRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">move</span><span class="p">();</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">draw</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+<span class="nx">setInterval</span><span class="p">(</span><span class="nx">gameLoop</span><span class="p">,</span> <span class="nx">FPS</span><span class="p">);</span>
+</code></pre></div><p>And last but not least, add a little motion to our existing ball (remember, we have to normalize it by FPS):</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">paddle1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">paddle2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ball</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="nx">BALL_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</code></pre></div><p>If all went well you&#39;ll now see two paddles and a ball going right through the one on the right. Your code should look something like this:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">FPS</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">PADDLE_SPEED</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">BALL_SPEED</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
 
-This allows for a lot of flexibility that normal object oriented languages don't offer, but it also has created a lot of confusion. The _"class oriented"_ way of creating objects in JavaScript is to use the ```new``` operator. When the ```new``` operator is used on a function, it clones that function's prototype into a new object, applies the function, and then returns the object. We can use the ```new``` operator to mimic a class based language by treating the function as a constructor and assign class methods to the functions prototype.
+<span class="kd">var</span> <span class="nx">canvas</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'screen'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ctx</span> <span class="o">=</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s1">'2d'</span><span class="p">);</span>
 
-For example, if we wanted to create a Car class we could do:
+<span class="kd">var</span> <span class="nx">elements</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="kd">var</span> <span class="nx">Element</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">,</span> <span class="nx">vx</span><span class="p">,</span> <span class="nx">vy</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">width</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">height</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="nx">vx</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">vy</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
 
-```javascript
-var Car = function(color) {
-  this.color = color;
-};
-Car.prototype.describe = function() {
-  alert('This is a ' + this.color + ' car.');
-}
-</code></pre><p>Then to use the class:</p><pre><code class="language-javascript">redCar = new Car('red');
-redCar.describe(); // alerts "this is a red car."
-</code></pre><p>For our pong game, we’re going to create a <em>“class”</em> for game elements. Our elements will maintain their size dimensions, positions, have a method for drawing themselves, move themselves, and, with the help of a global elements container, be able to detect collisions with other elements.</p><p>For simplicity sake we’ll add a few restrictions.<br /> * All elements will be rectangles.<br /> * All elements will check for collisions against all other elements (instead of a set of “nearby” elements).<br /> * When an element collides with another element, it reverses it’s velocity (bounces).</p><p>Let’s get started:</p><pre><code class="language-javascript">var Element = function(x, y, width, height, vx, vy) {
-  this.x = x;
-  this.y = y;
-  this.width = width;
-  this.height = height;
-  this.vx = vx || 0;
-  this.vy = vy || 0;
-};
-</code></pre><p>Here we have our constructor, pretty basic. It takes an <code>x</code> and a <code>y</code> for position, a <code>width</code> and a <code>height</code>. Optionally it can take a <code>vx</code> for it’s horizontal velocity and a <code>vy</code> for it’s vertical velocity, which both default to zero when not set.</p><p>We’re also going to want to add a way to iterate through all of our elements easily. To do this we’re going to add a global <code>elements</code> list and append new elements to it when their constructor is applied:</p><pre><code class="language-javascript">var elements = [];
-var Element = function(x, y, width, height, vx, vy) {
-  this.x = x;
-  this.y = y;
-  this.width = width;
-  this.height = height;
-  this.vx = vx || 0;
-  this.vy = vy || 0;
+  <span class="nx">elements</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">draw</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">move</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+<span class="p">};</span>
 
-  elements.push(this);
-};
-</code></pre><p>The next thing we’ll need to do is have a way to draw the elements. At the top of our file we’ll want to keep the same instantiation of our <code>canvas</code> and our <code>ctx</code> that we had before:</p><pre><code class="language-javascript">var canvas = document.getElementById('screen');
-var ctx = canvas.getContext('2d');
-</code></pre><p>In our Element prototype we’ll add a draw function that uses them:</p><pre><code class="language-javascript">Element.prototype.draw = function() {
-  ctx.fillRect(this.x, this.y, this.width, this.height);
-};
-</code></pre><p>Now let’s instantiate a couple elements relevant to our pong game:</p><pre><code class="language-javascript">var paddle1 = new Element(5, 65, 5, 30);
-var paddle2 = new Element(230, 65, 5, 30);
-var ball = new Element(117, 77, 6, 6);
-</code></pre><p>Now if we load our screen we should just see two paddles facing each other and not much else.</p><h2 id="moving">Moving</h2><p>Our big issue is that nothing is moving. Similar to our previous example of basic moving rectangles, we’ll need a loop constantly clearing the canvas, moving the elements, and drawing the elements. In addition, our loop will have to manage some game logic. We’ll call this loop, the game loop.</p><p>Before we go any further, I find it helps to explicitly declare our element speeds and refresh rate at the top of our file:</p><pre><code class="language-javascript">var FPS = 60;
-var PADDLE_SPEED = 100;
-var BALL_SPEED = 100;
-</code></pre><p><em>Note that <code>FPS</code> is a rate of game updates per second, while <code>PADDLE_SPEED</code> and <code>BALL_SPEED</code> are a displacement constant of pixels per second.</em></p><p>Now let’s add our movement:</p><pre><code class="language-javascript">Element.prototype.move = function() {
-  this.x += this.vx;
-  this.y += this.vy;
-};
-</code></pre><p>Create our game loop at the bottom of our code:</p><pre><code class="language-javascript">var gameLoop = function() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var i = 0; i &lt; elements.length; i++) {
-    elements[i].move();
-    elements[i].draw();
-  }
-};
-setInterval(gameLoop, FPS);
-</code></pre><p>And last but not least, add a little motion to our existing ball (remember, we have to normalize it by FPS):</p><pre><code class="language-javascript">var paddle1 = new Element(5, 65, 5, 30);
-var paddle2 = new Element(230, 65, 5, 30);
-var ball = new Element(117, 77, 6, 6, BALL_SPEED / FPS, 0);
-</code></pre><p>If all went well you’ll now see two paddles and a ball going right through the one on the right. Your code should look something like this:</p><pre><code class="language-javascript">var FPS = 60;
-var PADDLE_SPEED = 100;
-var BALL_SPEED = 100;
+<span class="kd">var</span> <span class="nx">paddle1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">paddle2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ball</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="nx">BALL_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 
-var canvas = document.getElementById('screen');
-var ctx = canvas.getContext('2d');
+<span class="kd">var</span> <span class="nx">gameLoop</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">clearRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">move</span><span class="p">();</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">draw</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+<span class="nx">setInterval</span><span class="p">(</span><span class="nx">gameLoop</span><span class="p">,</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">);</span>
+</code></pre></div><h2>Collision Detection</h2><p>It&#39;s important to remember that Canvas elements have their origin in the top left corner. The positive y-axis goes down, and the positive x-axis goes right. This is a little tricky to think about, so I find it&#39;s helpful to add a set of helper functions to the prototype that return the y values of top and bottom sides of the element, and the x values of the right and left.</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">Element</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">,</span> <span class="nx">vx</span><span class="p">,</span> <span class="nx">vy</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">width</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">height</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="nx">vx</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">vy</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
 
-var elements = [];
-var Element = function(x, y, width, height, vx, vy) {
-  this.x = x;
-  this.y = y;
-  this.width = width;
-  this.height = height;
-  this.vx = vx || 0;
-  this.vy = vy || 0;
+  <span class="nx">elements</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">x</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">right</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bottom</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div><p>Let&#39;s preface this with something. Real game collision detection is hard. We have a huge advantage in our pong game: 1. There are only two axis. 2. Everything is a rectangle. 3. We don&#39;t have enough elements that looping through all of them is a problem.</p><p>If there is a collision we&#39;ll want to reverse the direction of the element (bounce). In our <code>move</code> function we&#39;ll loop through and check collision of the current element against every other element. If we do collide, we&#39;ll reverse the velocity and break our loop. It should look something like this:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">move</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">el</span> <span class="o">=</span> <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">el</span> <span class="o">==</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">//don't check collision against yourself</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
 
-  elements.push(this);
-};
-Element.prototype.draw = function() {
-  ctx.fillRect(this.x, this.y, this.width, this.height);
-};
-Element.prototype.move = function() {
-  this.x += this.vx / FPS;
-  this.y += this.vy / FPS;
-};
+    <span class="c1">// bounce on horizontal collision</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="p">...</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
 
-var paddle1 = new Element(5, 65, 5, 30);
-var paddle2 = new Element(230, 65, 5, 30);
-var ball = new Element(117, 77, 6, 6, BALL_SPEED / FPS, 0);
+    <span class="c1">// bounce on vertical collision</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="p">...</span> <span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">vy</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
 
-var gameLoop = function() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var i = 0; i &lt; elements.length; i++) {
-    elements[i].move();
-    elements[i].draw();
-  }
-};
-setInterval(gameLoop, 1000 / FPS);
-</code></pre><h2 id="collision-detection">Collision Detection</h2><p>It’s important to remember that Canvas elements have their origin in the top left corner. The positive y-axis goes down, and the positive x-axis goes right. This is a little tricky to think about, so I find it’s helpful to add a set of helper functions to the prototype that return the y values of top and bottom sides of the element, and the x values of the right and left.</p><pre><code class="language-javascript">var Element = function(x, y, width, height, vx, vy) {
-  this.x = x;
-  this.y = y;
-  this.width = width;
-  this.height = height;
-  this.vx = vx || 0;
-  this.vy = vy || 0;
+    <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div><p>Our definition of a horizontal collision for some element A&#39;s right side to collide into element B&#39;s left side will be:</p><ol><li>The top of A is above the bottom of B</li><li>The bottom of A is below the top of B</li><li>Before vx is applied, A&#39;s right side is to the left of element B&#39;s left side</li><li>After vx is applied, A&#39;s right side is to the right of element B&#39;s left side</li></ol><p>In code this looks like this (remember, down is more positive in canvas): 1. <code>A.top() &lt; B.bottom()</code> 2. <code>A.bottom() &gt; B.top()</code> 3. <code>A.right() &lt; B.left()</code> 4. <code>A.right() + A.vx &gt;= B.left()</code></p><p>A version in our move function that accounts for both-right side and left-side collision will be:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">if</span> <span class="p">((</span><span class="k">this</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">top</span><span class="p">())</span> <span class="o">&amp;&amp;</span>
+    <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">&gt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">||</span>
+     <span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">&lt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()))</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+  <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div><p>With the vertical variant (same logic, but swap top and left and bottom and right), here is our new move function:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">move</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">el</span> <span class="o">=</span> <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">==</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
 
-  elements.push(this);
-};
-Element.prototype.left = function() {
-  return this.x;
-};
-Element.prototype.right = function() {
-  return this.x + this.width;
-};
-Element.prototype.top = function() {
-  return this.y;
-};
-Element.prototype.bottom = function() {
-  return this.y + this.height;
-};
-</code></pre><p>Let’s preface this with something. Real game collision detection is hard. We have a huge advantage in our pong game:<br /> 1. There are only two axis.<br /> 2. Everything is a rectangle.<br /> 3. We don’t have enough elements that looping through all of them is a problem.</p><p>If there is a collision we’ll want to reverse the direction of the element (bounce). In our <code>move</code> function we’ll loop through and check collision of the current element against every other element. If we do collide, we’ll reverse the velocity and break our loop. It should look something like this:</p><pre><code class="language-javascript">Element.prototype.move = function() {
-  for (var i=0; i &lt; elements.length; i++) {
-    el = elements[i];
-    if (el == this) {
-      //don't check collision against yourself
-      continue;
-    }
-    
-    // bounce on horizontal collision
-    if ( ... ) {
-      this.vx = -this.vx;
-      break;
-    }
-    
-    // bounce on vertical collision
-    if ( ... ) {
-      this.vy = -this.vy;
-      break;
-    }
+    <span class="c1">// bounce on horizontal collision</span>
+    <span class="k">if</span> <span class="p">((</span><span class="k">this</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">top</span><span class="p">())</span> <span class="o">&amp;&amp;</span>
+        <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">&gt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">||</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">&lt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()))</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
 
-    this.x += this.vx;
-    this.y += this.vy;
-};
-</code></pre><p>Our definition of a horizontal collision for some element A’s right side to collide into element B’s left side will be:</p><ol><li>The top of A is above the bottom of B</li><li>The bottom of A is below the top of B</li><li>Before vx is applied, A’s right side is to the left of element B’s left side</li><li>After vx is applied, A’s right side is to the right of element B’s left side</li></ol><p>In code this looks like this (remember, down is more positive in canvas):<br /> 1. <code>A.top() &lt; B.bottom()</code><br /> 2. <code>A.bottom() &gt; B.top()</code><br /> 3. <code>A.right() &lt; B.left()</code><br /> 4. <code>A.right() + A.vx &gt;= B.left()</code></p><p>A version in our move function that accounts for both-right side and left-side collision will be:</p><pre><code class="language-javascript">if ((this.top() &lt; el.bottom() &amp;&amp; this.bottom() &gt; el.top()) &amp;&amp;
-    (this.right() &lt; el.left() &amp;&amp; this.right() + this.vx &gt;= el.left() ||
-     this.left() &gt; el.right() &amp;&amp; this.left() + this.vx &lt;= el.right())) {
-  this.vx = -this.vx;
-  break;
-}
-</code></pre><p>With the vertical variant (same logic, but swap top and left and bottom and right), here is our new move function:</p><pre><code class="language-javascript">Element.prototype.move = function() {
-  for (var i=0; i &lt; elements.length; i++) {
-    el = elements[i];
-    if (elements[i] == this) {
-      continue;
-    }
-    
-    // bounce on horizontal collision
-    if ((this.top() &lt; el.bottom() &amp;&amp; this.bottom() &gt; el.top()) &amp;&amp;
-        (this.right() &lt; el.left() &amp;&amp; this.right() + this.vx &gt;= el.left() ||
-         this.left() &gt; el.right() &amp;&amp; this.left() + this.vx &lt;= el.right())) {
-      this.vx = -this.vx;
-      break;
-    }
-    
-    // bounce on vertical collision
-    if ((this.left() &lt; el.right() &amp;&amp; this.right() &gt; el.left()) &amp;&amp;
-        (this.bottom() &lt; el.top() &amp;&amp; this.bottom() + this.vy &gt;= el.top() ||
-         this.top() &gt; el.bottom() &amp;&amp; this.top() + this.vy &lt;= el.bottom())) {
-      this.vy = -this.vy;
-      break;
-    }
-  }
-  this.x += this.vx;
-  this.y += this.vy;
-};
-</code></pre><p>If we test this you should now see the ball bouncing back and forth between each paddle.</p><p><em>If you’re having trouble with understanding this code, it’s OK, it’s really just a test of your ability to write long if statements and not your JavaScript skill. Just copy and paste my code and move on.</em></p><h2 id="controlling-player-one">Controlling Player One</h2><p>As we talked about in the first part of this lesson, JavaScript is an event driven language. It specializes in responding to lots of events and performing them on a single thread without requiring the programmer to do anything special. The browser (in the form of the global <code>window</code> object) makes this even easier by giving us <em>event listeners</em> which we can use to “listen” for an event and define a callback function to respond with.</p><p>Our goal is to control the first paddle (paddle1, the one on the left) with the up and down arrows of the players keyboard. To do this, we’re going to set up two event listeners, an <code>onkeydown</code> listener that listens for a key to be pressed and passes data about the keypress to the callback function, and an <code>onkeyup</code> listener. The first will tell the paddle to start moving, the second will tell it to stop.</p><p>Add this after <code>paddle1</code> has been defined.<br /> ```javascript<br /> window.onkeydown = function() {<br /> // go up if the up key was pressed<br /> if ( … ) {<br /> paddle1.vy = -PADDLE_SPEED / FPS;<br /> }</p><p>// go down if it was the down key was pressed<br /> if ( … ) {<br /> paddle1.vy = PADDLE_SPEED / FPS;<br /> }<br /> }<br /> ```</p><p>As you can see, on the keydown event we somehow figure out if it was the up key or the down key and then change paddle1’s y-velocity accordingly.</p><p>The way we determine which key is being pressed is by the event object that the onkeydown listener passes to the callback. This object has a property called <code>keyCode</code> which defines the key pressed. Every key on the keyboard has a unique keyCode. The up keycode is <code>38</code> and the down keycode is <code>40</code>.</p><pre><code class="language-javascript">window.onkeydown = function(event) {
-  // go up if the up key was pressed
-  if (event.keyCode === 38) {
-    paddle1.vy = -PADDLE_SPEED / FPS;
-  }
+    <span class="c1">// bounce on vertical collision</span>
+    <span class="k">if</span> <span class="p">((</span><span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">())</span> <span class="o">&amp;&amp;</span>
+        <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">&gt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">||</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">&lt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()))</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">vy</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div><p>If we test this you should now see the ball bouncing back and forth between each paddle.</p><p><em>If you&#39;re having trouble with understanding this code, it&#39;s OK, it&#39;s really just a test of your ability to write long if statements and not your JavaScript skill. Just copy and paste my code and move on.</em></p><h2>Controlling Player One</h2><p>As we talked about in the first part of this lesson, JavaScript is an event driven language. It specializes in responding to lots of events and performing them on a single thread without requiring the programmer to do anything special. The browser (in the form of the global <code>window</code> object) makes this even easier by giving us <em>event listeners</em> which we can use to &quot;listen&quot; for an event and define a callback function to respond with.</p><p>Our goal is to control the first paddle (paddle1, the one on the left) with the up and down arrows of the players keyboard. To do this, we&#39;re going to set up two event listeners, an <code>onkeydown</code> listener that listens for a key to be pressed and passes data about the keypress to the callback function, and an <code>onkeyup</code> listener. The first will tell the paddle to start moving, the second will tell it to stop.</p><p>Add this after <code>paddle1</code> has been defined. ```javascript window.onkeydown = function() { // go up if the up key was pressed if ( ... ) { paddle1.vy = -PADDLE_SPEED / FPS; }</p><p>// go down if it was the down key was pressed if ( ... ) { paddle1.vy = PADDLE_SPEED / FPS; } } ```</p><p>As you can see, on the keydown event we somehow figure out if it was the up key or the down key and then change paddle1&#39;s y-velocity accordingly.</p><p>The way we determine which key is being pressed is by the event object that the onkeydown listener passes to the callback. This object has a property called <code>keyCode</code> which defines the key pressed. Every key on the keyboard has a unique keyCode. The up keycode is <code>38</code> and the down keycode is <code>40</code>.</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nb">window</span><span class="p">.</span><span class="nx">onkeydown</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// go up if the up key was pressed</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle1</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="o">-</span><span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span>
 
-  // go down if it was the down key was pressed
-  if (event.keyCode === 40) {
-    paddle1.vy = PADDLE_SPEED / FPS;
-  }
-};
-</code></pre><p>If you test this you should see your paddle sliding back and forth without stop. The stop needs to happen on keyup. For this we’ll simply add a <code>keyup</code> event listener.</p><pre><code class="language-javascript">window.onkeyup = function(e) {
-  paddle1.vy = 0;
-};
-</code></pre><p>Now we should have proper start and stop control of <code>paddle1</code> using the up and down arrows on the keybord.</p><h2 id="walls-and-resetting-the-ball">Walls and resetting the ball</h2><p>Now is a good time to add the walls. Ideally, you should treat walls differently from game elements, but our goal here is to be simple, so let’s just add two new elements with no velocity to represent our walls:</p><pre><code class="language-javascript">// create top and bottom walls 
-var topWall = new Element( 0, 0, 240, 1);
-var bottomWall = new Element(0, 159, 240, 1);
-</code></pre><p>Now let’s use them, let’s change the ball to move at an angle.</p><pre><code class="language-javascript">var ball = new Element(117, 77, 6, 6, -1 * BALL_SPEED / FPS, 0.6 * BALL_SPEED / FPS);
-</code></pre><p>Lastly, let’s add some game rules to the game loop. When we see the ball pass one of the paddles, we reset it to it’s start point:</p><pre><code class="language-javascript">var gameLoop = function() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var i = 0; i &lt; elements.length; i++) {
-    elements[i].move();
-    elements[i].draw();
-  }
-  computerPlayer();
-  firstPlayer();
+  <span class="c1">// go down if it was the down key was pressed</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle1</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div><p>If you test this you should see your paddle sliding back and forth without stop. The stop needs to happen on keyup. For this we&#39;ll simply add a <code>keyup</code> event listener.</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nb">window</span><span class="p">.</span><span class="nx">onkeyup</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">paddle1</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div><p>Now we should have proper start and stop control of <code>paddle1</code> using the up and down arrows on the keybord.</p><h2>Walls and resetting the ball</h2><p>Now is a good time to add the walls. Ideally, you should treat walls differently from game elements, but our goal here is to be simple, so let&#39;s just add two new elements with no velocity to represent our walls:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// create top and bottom walls </span>
+<span class="kd">var</span> <span class="nx">topWall</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">bottomWall</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">159</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</code></pre></div><p>Now let&#39;s use them, let&#39;s change the ball to move at an angle.</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">ball</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">BALL_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">,</span> <span class="mf">0.6</span> <span class="o">*</span> <span class="nx">BALL_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">);</span>
+</code></pre></div><p>Lastly, let&#39;s add some game rules to the game loop. When we see the ball pass one of the paddles, we reset it to it&#39;s start point:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">gameLoop</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">clearRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">move</span><span class="p">();</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">draw</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="nx">computerPlayer</span><span class="p">();</span>
+  <span class="nx">firstPlayer</span><span class="p">();</span>
 
-  // game rules
-  if (ball.right() &gt; canvas.width) {
-    ball.x = 117;
-    ball.y = 77;
-  } else if (ball.left() &lt; 0) {
-    ball.x = 117;
-    ball.y = 77;
-  }
-};
-</code></pre><p><em>At this point, if you wanted, you could probably figure out how to add control to the other player and have a finished pong game. But that’s the easy way out. The next section will be on how to make this a fun single player.</em></p><h2 id="ai-for-player-two">AI for Player Two</h2><p>Now for the fun stuff. Let’s make a simple AI to control Player Two. The AI will issue three states, move up, move down, and don’t move. It’s goal will be to move to the point at which it thinks the ball will arrive.</p><p>The way we’re going to do this is by knowing the ball’s x, y, vx, and vy, create a line representing it’s path, and come up with the intersection with our paddle. Let’s recall high school algebra.</p><p>The slope-intercept formula for a line is:</p><pre><code>y = mx + b
-</code></pre><p>Where <code>x</code> and <code>y</code> are a point on that line, <code>m</code> is it’s slope, and <code>b</code> is the y-intercept (the y value when x=0). Since <code>m</code> can be defined as our rise over our run, it shows that:</p><pre><code class="language-javascript">m = ball.vy / ball.vx
-</code></pre><p>And if we were to solve for <code>b</code> of the current ball’s path it shows:</p><pre><code>y = mx + b
-</code></pre><pre><code>b = y - mx
-</code></pre><pre><code class="language-javascript">b = ball.y - (ball.vy / ball.vx) * ball.x
-</code></pre><p>Now we have a <code>b</code> and a <code>m</code>. We want to solve for where our paddle should be, which will be our <code>y</code> value. Our <code>x</code> will simply be the x value of our paddle (our right paddle). Put this all together and we see:</p><pre><code class="language-javascript">y = m * paddle.x + b
-</code></pre><pre><code class="language-javascript">y = (ball.vy / ball.vx) * paddle.x + (ball.y - (ball.vy / ball.vx) * ball.x)
-</code></pre><p>If we simplify this, and call <code>y</code> our prediction we get a nice (less than 80 character wide) solution:</p><pre><code class="language-javascript">var prediction = (ball.vy / ball.vx) * (paddle.x - ball.x) + ball.y;
-</code></pre><p>Keep in mind that this doesn’t account for the walls. A lot of the time, the prediction will be outside the range of the field, but in practice, I find it still does a great job of telling the paddle to move up or down.</p><p>Now every frame we want to tell our paddle to move up, down, or stay in place. Let’s say we want the ball to hit somewhere in the middle third of our paddle. Our ai function should look like so:</p><pre><code class="language-javascript">var ai = function(paddle) {
-  var prediction = (ball.vy / ball.vx) * (paddle.x - ball.x) + ball.y;
-  if (prediction &lt; paddle.top() + paddle.height * 1/3) {
-    paddle.vy = -PADDLE_SPEED / FPS;
-  } else if (prediction &gt; paddle.top() + paddle.height * 2/3) {
-    paddle.vy = PADDLE_SPEED / FPS;
-  } else {
-    paddle.vy = 0;
-  }
-};
-</code></pre><p>Now to include that in our game loop, all we have to do is say:</p><pre><code class="language-javascript">// game loop
-var gameLoop = function() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var i = 0; i &lt; elements.length; i++) {
-    elements[i].move();
-    elements[i].draw();
-  }
-  ai(paddle2);
-  
-  // game rules
-  if (ball.right() &gt; canvas.width) {
-    ball.x = 117;
-    ball.y = 77;
-  } else if (ball.left() &lt; 0) {
-    ball.x = 117;
-    ball.y = 77;
-  }
-};
-setInterval(gameLoop, 1000 / FPS);
-</code></pre><p>If all goes well you should have a working computer player to play against. <em>Note that I’ve made the <code>ai</code> function accept a paddle so that you can use this for both <code>paddle1</code> and <code>paddle2</code>. Try having two AI play eachother, it’s pretty fun.</em></p><h2 id="afterword">Afterword</h2><p>You should now have a fully functional JavaScript Pong game. Hopefully you’ve been testing as you were writing, if not, feel free to reference the finished code below. The purpose of this exercise is to teach you JavaScript. If you want to create canvas games in the future, I highly recommend <strong>not</strong> doing it from scratch like we did with this. There are some great game development libraries our there such as <a href="http://enchantjs.com/">enchant.js</a> and great physics engines like <a href="http://box2d-js.sourceforge.net/">box2d.js</a> which will handle all the boilerplate code for you.</p><p>If you would like to get a little more out of the project, here are some ideas for additions…</p><ul><li>Random starting <code>vy</code> and <code>vx</code> for the ball.</li><li>A score board in HTML that updates.</li><li>A win condition after a certain number of points.</li><li>HTML buttons to set either paddle to AI or player controller.</li><li>Changing the <code>vy</code> of ball based on the <code>vy</code> of the paddle when they hit.</li><li>A smarter AI that considers bouncing off walls in it’s prediction.</li><li>Online two player battle (this is a great project for experimenting with Node and websockets).</li></ul><h2 id="finished-code">Finished Code</h2><pre><code class="language-javascript">var FPS = 60;
-var PADDLE_SPEED = 100;
-var BALL_SPEED = 100;
+  <span class="c1">// game rules</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">117</span><span class="p">;</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">77</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">117</span><span class="p">;</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">77</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div><p><em>At this point, if you wanted, you could probably figure out how to add control to the other player and have a finished pong game. But that&#39;s the easy way out. The next section will be on how to make this a fun single player.</em></p><h2>AI for Player Two</h2><p>Now for the fun stuff. Let&#39;s make a simple AI to control Player Two. The AI will issue three states, move up, move down, and don&#39;t move. It&#39;s goal will be to move to the point at which it thinks the ball will arrive.</p><p>The way we&#39;re going to do this is by knowing the ball&#39;s x, y, vx, and vy, create a line representing it&#39;s path, and come up with the intersection with our paddle. Let&#39;s recall high school algebra.</p><p>The slope-intercept formula for a line is:</p><div class="highlight"><pre><code class="language-" data-lang="">y = mx + b
+</code></pre></div><p>Where <code>x</code> and <code>y</code> are a point on that line, <code>m</code> is it&#39;s slope, and <code>b</code> is the y-intercept (the y value when x=0). Since <code>m</code> can be defined as our rise over our run, it shows that:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">m</span> <span class="o">=</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vx</span>
+</code></pre></div><p>And if we were to solve for <code>b</code> of the current ball&#39;s path it shows:</p><div class="highlight"><pre><code class="language-" data-lang="">y = mx + b
+</code></pre></div><div class="highlight"><pre><code class="language-" data-lang="">b = y - mx
+</code></pre></div><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">b</span> <span class="o">=</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vx</span><span class="p">)</span> <span class="o">*</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span>
+</code></pre></div><p>Now we have a <code>b</code> and a <code>m</code>. We want to solve for where our paddle should be, which will be our <code>y</code> value. Our <code>x</code> will simply be the x value of our paddle (our right paddle). Put this all together and we see:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">y</span> <span class="o">=</span> <span class="nx">m</span> <span class="o">*</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">b</span>
+</code></pre></div><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">y</span> <span class="o">=</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vx</span><span class="p">)</span> <span class="o">*</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vx</span><span class="p">)</span> <span class="o">*</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span>
+</code></pre></div><p>If we simplify this, and call <code>y</code> our prediction we get a nice (less than 80 character wide) solution:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">prediction</span> <span class="o">=</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vx</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nx">paddle</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="o">+</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+</code></pre></div><p>Keep in mind that this doesn&#39;t account for the walls. A lot of the time, the prediction will be outside the range of the field, but in practice, I find it still does a great job of telling the paddle to move up or down.</p><p>Now every frame we want to tell our paddle to move up, down, or stay in place. Let&#39;s say we want the ball to hit somewhere in the middle third of our paddle. Our ai function should look like so:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">ai</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">paddle</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">prediction</span> <span class="o">=</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vx</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nx">paddle</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="o">+</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">prediction</span> <span class="o">&lt;</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">+</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="o">-</span><span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">prediction</span> <span class="o">&gt;</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">+</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">paddle</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div><p>Now to include that in our game loop, all we have to do is say:</p><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// game loop</span>
+<span class="kd">var</span> <span class="nx">gameLoop</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">clearRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">move</span><span class="p">();</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">draw</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="nx">ai</span><span class="p">(</span><span class="nx">paddle2</span><span class="p">);</span>
 
-var canvas = document.getElementById('screen');
-var ctx = canvas.getContext('2d');
+  <span class="c1">// game rules</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">117</span><span class="p">;</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">77</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">117</span><span class="p">;</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">77</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+<span class="nx">setInterval</span><span class="p">(</span><span class="nx">gameLoop</span><span class="p">,</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">);</span>
+</code></pre></div><p>If all goes well you should have a working computer player to play against. <em>Note that I&#39;ve made the <code>ai</code> function accept a paddle so that you can use this for both <code>paddle1</code> and <code>paddle2</code>. Try having two AI play eachother, it&#39;s pretty fun.</em></p><h2>Afterword</h2><p>You should now have a fully functional JavaScript Pong game. Hopefully you&#39;ve been testing as you were writing, if not, feel free to reference the finished code below. The purpose of this exercise is to teach you JavaScript. If you want to create canvas games in the future, I highly recommend <strong>not</strong> doing it from scratch like we did with this. There are some great game development libraries our there such as <a href="http://enchantjs.com/">enchant.js</a> and great physics engines like <a href="http://box2d-js.sourceforge.net/">box2d.js</a> which will handle all the boilerplate code for you.</p><p>If you would like to get a little more out of the project, here are some ideas for additions...</p><ul><li>Random starting <code>vy</code> and <code>vx</code> for the ball.</li><li>A score board in HTML that updates.</li><li>A win condition after a certain number of points.</li><li>HTML buttons to set either paddle to AI or player controller.</li><li>Changing the <code>vy</code> of ball based on the <code>vy</code> of the paddle when they hit.</li><li>A smarter AI that considers bouncing off walls in it&#39;s prediction.</li><li>Online two player battle (this is a great project for experimenting with Node and websockets).</li></ul><h2>Finished Code</h2><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">FPS</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">PADDLE_SPEED</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">BALL_SPEED</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
 
-var elements = [];
-var Element = function(x, y, width, height, vx, vy) {
-  this.x = x;
-  this.y = y;
-  this.width = width;
-  this.height = height;
-  this.vx = vx || 0;
-  this.vy = vy || 0;
+<span class="kd">var</span> <span class="nx">canvas</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'screen'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ctx</span> <span class="o">=</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s1">'2d'</span><span class="p">);</span>
 
-  elements.push(this);
-};
-Element.prototype.draw = function() {
-  ctx.fillRect(this.x, this.y, this.width, this.height);
-};
-Element.prototype.move = function() {
-  for (var i=0; i &lt; elements.length; i++) {
-    el = elements[i];
-    if (elements[i] == this) {
-      continue;
-    }
-    // bounce on horizontal collision
-    if ((this.top() &lt; el.bottom() &amp;&amp; this.bottom() &gt; el.top()) &amp;&amp;
-        (this.right() &lt; el.left() &amp;&amp; this.right() + this.vx &gt;= el.left() ||
-         this.left() &gt; el.right() &amp;&amp; this.left() + this.vx &lt;= el.right())) {
-      this.vx = -this.vx;
-      break;
-    }
-    // bounce on vertical collision
-    if ((this.left() &lt; el.right() &amp;&amp; this.right() &gt; el.left()) &amp;&amp;
-        (this.bottom() &lt; el.top() &amp;&amp; this.bottom() + this.vy &gt;= el.top() ||
-         this.top() &gt; el.bottom() &amp;&amp; this.top() + this.vy &lt;= el.bottom())) {
-      this.vy = -this.vy;
-      break;
-    }
-  }
-  this.x += this.vx;
-  this.y += this.vy;
-};
-Element.prototype.left = function() {
-    return this.x;
-};
-Element.prototype.right = function() {
-    return this.x + this.width;
-};
-Element.prototype.top = function() {
-    return this.y;
-};
-Element.prototype.bottom = function() {
-    return this.y + this.height;
-};
+<span class="kd">var</span> <span class="nx">elements</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="kd">var</span> <span class="nx">Element</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">,</span> <span class="nx">vx</span><span class="p">,</span> <span class="nx">vy</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">width</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">height</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="nx">vx</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">vy</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
 
-// instantiate moving game elements
-var paddle1 = new Element(5, 65, 5, 30);
-var paddle2 = new Element(230, 65, 5, 30);
-var ball = new Element(117, 77, 6, 6, -1 * BALL_SPEED / FPS, 0.6 * BALL_SPEED / FPS);
+  <span class="nx">elements</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">draw</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">move</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">el</span> <span class="o">=</span> <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">==</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// bounce on horizontal collision</span>
+    <span class="k">if</span> <span class="p">((</span><span class="k">this</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">top</span><span class="p">())</span> <span class="o">&amp;&amp;</span>
+        <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">&gt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">||</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">&lt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()))</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">vx</span> <span class="o">=</span> <span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// bounce on vertical collision</span>
+    <span class="k">if</span> <span class="p">((</span><span class="k">this</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">left</span><span class="p">())</span> <span class="o">&amp;&amp;</span>
+        <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">&gt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">||</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">&lt;=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">bottom</span><span class="p">()))</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">vy</span><span class="p">;</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vx</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+=</span> <span class="k">this</span><span class="p">.</span><span class="nx">vy</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">x</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">right</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bottom</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+<span class="p">};</span>
 
-// create top and bottom walls 
-var topWall = new Element( 0, 0, 240, 1);
-var bottomWall = new Element(0, 159, 240, 1);
+<span class="c1">// instantiate moving game elements</span>
+<span class="kd">var</span> <span class="nx">paddle1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">paddle2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">ball</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">BALL_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">,</span> <span class="mf">0.6</span> <span class="o">*</span> <span class="nx">BALL_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">);</span>
 
-// player one controller
-window.onkeydown = function(event) {
-  // go up if the up key was pressed
-  if (event.keyCode === 38) {
-    paddle1.vy = -PADDLE_SPEED / FPS;
-  }
-  // go down if it was the down key was pressed
-  if (event.keyCode === 40) {
-    paddle1.vy = PADDLE_SPEED / FPS;
-  }
-};
-window.onkeyup = function(e) {
-  paddle1.vy = 0;
-};
+<span class="c1">// create top and bottom walls </span>
+<span class="kd">var</span> <span class="nx">topWall</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">bottomWall</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Element</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">159</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
 
-// computer player
-var ai = function(paddle) {
-  var prediction = (ball.vy / ball.vx) * (paddle.x - ball.x) + ball.y;
-  if (prediction &lt; paddle.top() + paddle.height * 1/3) {
-    paddle.vy = -PADDLE_SPEED / FPS;
-  } else if (prediction &gt; paddle.top() + paddle.height * 2/3) {
-    paddle.vy = PADDLE_SPEED / FPS;
-  } else {
-    paddle.vy = 0;
-  }
-};
+<span class="c1">// player one controller</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">onkeydown</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// go up if the up key was pressed</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle1</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="o">-</span><span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">// go down if it was the down key was pressed</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle1</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">onkeyup</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">paddle1</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
 
-// game loop
-var gameLoop = function() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var i = 0; i &lt; elements.length; i++) {
-    elements[i].move();
-    elements[i].draw();
-  }
-  
-  ai(paddle2);
-  // game rules
-  if (ball.right() &gt; canvas.width) {
-    ball.x = 117;
-    ball.y = 77;
-  } else if (ball.left() &lt; 0) {
-    ball.x = 117;
-    ball.y = 77;
-  }
-};
-setInterval(gameLoop, 1000 / FPS);
-</code></pre></article><div class="back"> <a href="/">Back</a></div></main></body></html>
+<span class="c1">// computer player</span>
+<span class="kd">var</span> <span class="nx">ai</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">paddle</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">prediction</span> <span class="o">=</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">vy</span> <span class="o">/</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">vx</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nx">paddle</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="o">+</span> <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">prediction</span> <span class="o">&lt;</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">+</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="o">-</span><span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">prediction</span> <span class="o">&gt;</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">top</span><span class="p">()</span> <span class="o">+</span> <span class="nx">paddle</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">paddle</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="nx">PADDLE_SPEED</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">paddle</span><span class="p">.</span><span class="nx">vy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// game loop</span>
+<span class="kd">var</span> <span class="nx">gameLoop</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">ctx</span><span class="p">.</span><span class="nx">clearRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">move</span><span class="p">();</span>
+    <span class="nx">elements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">draw</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="nx">ai</span><span class="p">(</span><span class="nx">paddle2</span><span class="p">);</span>
+  <span class="c1">// game rules</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">right</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">canvas</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">117</span><span class="p">;</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">77</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">ball</span><span class="p">.</span><span class="nx">left</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">117</span><span class="p">;</span>
+    <span class="nx">ball</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">77</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+<span class="nx">setInterval</span><span class="p">(</span><span class="nx">gameLoop</span><span class="p">,</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nx">FPS</span><span class="p">);</span>
+</code></pre></div></article><div class="back"> <a href="/">Back</a></div></main></body></html>
