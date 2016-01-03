@@ -5,13 +5,14 @@ date: 2016-01-02 11:04:03.000000000 -04:00
 ---
 
 It's been a while since I posted. In the past year or so, my company has adopted
-my new favorite language, [Clojure](clojure.org), a lisp that runs ontop of the
+my new favorite language, [Clojure](clojure.org), a lisp that runs on top of the
 JVM with full Java interop.
 
 Some of the code that we write needs to be quite fast. Clojure, out of the box,
 is pretty snappy, but to really squeeze out the performance, it takes a mix of
 trial and error testing and some understanding of what's happening under the
 hood to really get great speed.
+
 
 # A simple question
 
@@ -129,12 +130,14 @@ that I highly recommend!
 So, next question, what is causing the constant factor difference in `first` and
 `get` from the function call?
 
+
 # Understanding what's under the hood
 
 When trying to figure out what's happening, I immediately go to the source.
 Luckily, clojures core library and java implementation are super readable. In
 fact, [clojuredocs.org](https://clojuredocs.org/) always link to the source with
 each function. Lets take a look.
+
 
 ### What happens when we call `first` on a vector?
 
@@ -151,12 +154,14 @@ Lets jump right into `clojure.core/first`. What do we see?
  first (fn ^:static first [coll] (. clojure.lang.RT (first coll))))
 ```
 
-For `first`, the answer is pretty clear, it's calling [`seq`](https://clojuredocs.org/clojure.core/seq).
-on the collection. This is actually super common, and has caught me up more than
-once.
+Right away we see a potential reason in the docstring.
 
-If we dig into `clojure.lang.RT` we see what's actually being created. Follow
-the `>` to see where we step into the next function.
+> "Calls seq on it's argument."
+
+But what does calling [`seq`](https://clojuredocs.org/clojure.core/seq) really
+mean? The code is really just offloading to the java implimentation of `first`
+in `clojure.lang.RT`. If we dig in, we see what's actually being created. The
+`>` denotes when we step into the next function.
 
 ```java
  // https://github.com/clojure/clojure/blob/clojure-1.7.0/src/jvm/clojure/lang/RT.java#L651-L658
@@ -226,30 +231,31 @@ our answer, `first` requires creating a `seq` and a `seq` requires pulling out
 However, since it's lazy, it's not an O(n) transformation, it will always be 32
 elements. Hence, the overhead is constant.
 
+
 ### What happens when we call `get` on a vector?
 
 Lets take a look at `clojure.core/get`.
 
 ```clojure
-;; https://github.com/clojure/clojure/blob/clojure-1.7.0/src/clj/clojure/core.clj#L1423-L1431
-(defn get
-  "Returns the value mapped to key, not-found or nil if key not present."
-  {:inline (fn  [m k & nf] `(. clojure.lang.RT (get ~m ~k ~@nf)))
-   :inline-arities #{2 3}
-   :added "1.0"}
-  ([map key]
-   (. clojure.lang.RT (get map key)))
-  ([map key not-found]
-   (. clojure.lang.RT (get map key not-found))))
+ ;; https://github.com/clojure/clojure/blob/clojure-1.7.0/src/clj/clojure/core.clj#L1423-L1431
+ (defn get
+   "Returns the value mapped to key, not-found or nil if key not present."
+   {:inline (fn  [m k & nf] `(. clojure.lang.RT (get ~m ~k ~@nf)))
+    :inline-arities #{2 3}
+    :added "1.0"}
+   ([map key]
+>   (. clojure.lang.RT (get map key)))
+   ([map key not-found]
+    (. clojure.lang.RT (get map key not-found))))
 ```
 
 ```java
-https://github.com/clojure/clojure/blob/clojure-1.7.0/src/jvm/clojure/lang/RT.java#L719-L723
-static public Object get(Object coll, Object key){
-	if(coll instanceof ILookup)
-		return ((ILookup) coll).valAt(key);
-	return getFrom(coll, key);
-}
+ https://github.com/clojure/clojure/blob/clojure-1.7.0/src/jvm/clojure/lang/RT.java#L719-L723
+ static public Object get(Object coll, Object key){
+ 	if(coll instanceof ILookup)
+>		return ((ILookup) coll).valAt(key);
+ 	return getFrom(coll, key);
+ }
 ```
 
 This takes us into the clojure implementation of the vector, `Vec`.
@@ -319,6 +325,7 @@ difference being the missing/error case. So, what makes `get` so much slower?
 Simple, it's **reflection**. The `instanceof` call in the `clojure.lang.RT.get`
 is our culprit.
 
+
 # So, `nth` is the fastest?
 
 Yes, and no. There is a function, `clojure.core/nth`, which you may be tempted
@@ -373,7 +380,8 @@ nil
 
 If you really want the fastest way, then you can type-hint the vector. That
 will get you the same performance as the other method definitions of the type
-and bypass **all** reflection.
+and bypass **all** reflection. But the difference with the function form is
+neglegable.
 
 ```clojure
 user=> (time (dotimes [_ 100000000] (.nth ^clojure.lang.IPersistentVector some-vec 0)))
@@ -384,7 +392,7 @@ nil
 # Conclusion
 
 Writing performant clojure is very possible, but it takes some thought. There's
-this constant war in the language between top-level-namespace polymorphic
+this constant war in the language between top-level-namespaced polymorphic
 functions like `first` and `get` and the very real implications of reflection in
 the language. Speeding up very tight loops requires constant vigilance,
 constant testing, and constant understanding of whats going on under the hood.
