@@ -31,7 +31,7 @@ Since graduating school and working in the real world, my ability to weaponize b
 
 However, there are a few tools that, even though I know are useful, avoid using properly due to their steep learning curves. To approach this I've come up with three sub-resolutions.
 
-1. __Use find like a man.__ Up until now I've only every used find by doing ```find . | grep filename```. I know it can do much more, but it's unnatural flags have scared me. I will conquer these fears and learn to use find properly.
+1. __Use find like a boss.__ Up until now I've only every used find by doing ```find . | grep filename```. I know it can do much more, but it's unnatural flags have scared me. I will conquer these fears and learn to use find properly.
 2. __Learn Sed & Awk.__ My father once told me he writes all his code in either assembly or Awk. Its terrified me ever since. But I know these tools are the next step in my path to pipe-chain enlightenment. I will master these languages to use them prominently in my tool set.
 3. __Write tar commands without referencing the man page.__ This has been a goal of mine ever since I was a naive teenage Linux user who attempted to install things from source. [Even XKCD knows my pain](https://xkcd.com/1168/)
 
