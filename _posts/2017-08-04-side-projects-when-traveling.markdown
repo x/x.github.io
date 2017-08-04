@@ -18,6 +18,8 @@ Why did I do that? I'm sitting in one of the most lush and beautiful cities in t
 
 Later that night I grabbed drinks with a friend that I had me a week prior in a different city. We talked about self-definition and I expressed my concern that, even far away from the city that burned me out, I find myself wandering back to my old habbits and needing to hack.
 
-She said, _"You're in the beginning of this trip, so maybe I'm like your Ghost of Chistmas Past. Where you're comparing yourself to the person you have been up until now. I think that, later, you'll start comparing your current life to the lives of your friends back home. And then, even later than that, you'll meet a Ghost of Christmas Future and they'll show you that no one's going to come to your funeral if you can't stop thinking about code and chill the fuck out for a minute Devon."_
+She said,
+
+> _"You're in the beginning of this trip, so maybe I'm like your Ghost of Chistmas Past. Where you're comparing yourself to the person you have been up until now. I think that, later, you'll start comparing your current life to the lives of your friends back home. And then, even later than that, you'll meet a Ghost of Christmas Future and they'll show you that no one's going to come to your funeral if you can't stop thinking about code and chill the fuck out for a minute Devon."_
 
 They were wise words from someone drunk on cheap tequilla.
