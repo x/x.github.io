@@ -16,7 +16,8 @@ permalink:          /writes-about/:title # Post permalink
 timezone:           America/New_York # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 # Site Build
-markdown:           redcarpet
+highlighter:        rouge
+markdown:           kramdown
 kramdown:
     input:          GFM
 sass:
@@ -28,10 +29,7 @@ exclude:            [ "LICENSE", "README.md", "CNAME", "vendor", "Gemfile" ]
 gems:
   - jekyll-sitemap
 
-compress_html:
-    clippings:      all
-    ingore:
-        envs:       [ "test" ]
+
 
 defaults:
   -
