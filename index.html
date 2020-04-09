@@ -1,22 +1,54 @@
----
-layout: default
----
+<html>
+	<head>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css">
+		<script type="text/javascript"> <!--
+    	function UnCryptMailto(s) {
+    	    var n = 0;
+    	    var r = "";
+    	    for(var i = 0; i < s.length; i++) {
+    	        n = s.charCodeAt( i );
+    	        if( n >= 8364 ) {
+    	            n = 128;
+    	        }
+    	        r += String.fromCharCode( n - 1 );
+    	    }
+    	    return r;
+    	}
+    	function linkTo_UnCryptMailto(s) {
+    	    location.href=UnCryptMailto(s);
+    	}
+    	// --> </script>
+	</head>
+	<body>
+		<h1>Hello World</h1>
+		<p>
+		My name is Devon Peticolas; I'm a Data Generalist with love for functional programming, programming history, and building environments that foster compelling data science. I often speak at conferences and meetups about Data Science and Engineering.
+		<p>
+		In my spare time, I'm taking long bike rides and perfecting the chocolate chip cookie.
 
-<section>
-	<ul>
+		<h2>Contact Me</h2>
+		<a href="javascript:linkTo_UnCryptMailto('nbjmup;efwpoAqfujdpm/bt');">devon[at]peticol[dot]as</a>
 
-		{% for post in site.posts %}
-
-		<li>
-			<div class="post-date">
-				<span>{{ post.date | date: "%b %d, %Y" }}</span>
-			</div>
-			<div class="title">
-				<a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-			</div>
-		</li>
-
-		{% endfor %}
-
-	</ul>
-</section>
+		<h3>Links</h3>
+		<ul>
+			<li><a href="https://github.com/x">github.com/x</a></li>
+			<li><a href="https://github.com/x/Resume/blob/master/resume.pdf">github.com/x/Resume</a></li>
+			<li><a href="https://github.com/x/slides">github.com/x/slides</a></li>
+		</ul>
+		<h3>Videos</h3>
+		<ul>
+			<li><a href="https://youtu.be/EFqVCKfYJW4?t=2222">NYC Timeseries Meetup 2019</a></li>
+			<li><a href="https://livestream.com/internetsociety/iotny51/videos/170322009">NYC IoT Meetup 2017</a></li>
+			<li><a href="https://www.youtube.com/watch?v=ZaacMXFmttw">Pycon Japan 2017></a></li>
+			<li><a href="https://www.youtube.com/watch?v=VC_MTD68erY">Clojure/West 2016</a></li>
+		</ul>
+		<h3>Publications</h3>
+		<ul>
+			<li><a href="https://ieeexplore.ieee.org/document/8955638">Mímir: Building and Deploying an ML Framework for Industrial IoT</a></li>
+		</ul>
+		<h3>Fun</h3>
+		<ul>
+			<li><a href="https://itty.bitty.site/#index.html/data:text/html;charset=utf-8;bxze64,XQAAAALkAwAAAAAAAAAeGMgnEVrNjm+9V9MWkXE8WrW60hjR/orCkLfrhMNufb/Ieq3rrK5zhak+Jryczm3jZVh+Xu5oO0/s09JLrH8uTVK6qcjp38hKVXOmdciFL7CfcITPJL9wQ4PkO39tronRiDgBmE/teB0+Lpp8FK16HpL92tVbQHgurKMI0MufMN/Dypif/4KgcBmdmEV5SRW16mxFM3glif+IWMgdArRtN7DYbTr/iOLBS+XQDYfhz59biSdBHIy4aQlLu89JxxAVJuvaRrXmmXAcl0pwlqYeOKIeBch5UW0bd+dgTHugq3eUNSB6gB9ljSZJKHtt5ZBH0T9K15Km2g+Zpzn1/b0AzzSbG2ksZCIvsjWf7nMJZ70sSyxc/YfBWDedKybkRzX33OYsO8q91fk5XhtDlkU5FS5zLcOnpt/s/bUkMucka5TMZkN63evGiKdDHm/Y6703jCqgkf5pRpVjkuDhExkQjv++qVXIz2lyRYYx6T1dSQ6+dc7hrsGe/4C6jpIqGYsx0xBwGvdTzic4xzmpQnRprirjTxTfo1aSoslZA8ahG19DRImApH49vVN2knDUGAx1EU5vl88aXd3tmce1sZrnYx4CC94xIsIMplwUDLUE06kNheAI/gJRZhoMvAqEi9OaeUL44S5kG3T5NYlt6YmXzqggEgR3p+IjKhgM/BjDMRHxERRlu6m2iOjUfMxco94sLQxRJ83cOMTogts+Zo2M19+B5SE+VeWxmFIOmubCqNQCbk3tnBaXC9Iz685DA0LcLdxK/Ck4i3ALgUEwQIl9Olh9h5swMW3uuwXv9zeHmAWbRWEr/fBvhECSYS/H7U1RvXEK1myFrx2ElRcly85cJWhR2oLh99bcc1IzIdIcQHwSgTMAdCwxqwKjML0uEZEZs44r8v/ivYNa">Flappy Bird in 1K JS</a></li>
+		</ul>
+	</body>
+</html>
